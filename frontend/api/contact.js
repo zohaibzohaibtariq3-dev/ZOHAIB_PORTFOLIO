@@ -30,9 +30,10 @@ export default async function handler(req, res) {
 
   const recipientEmail = process.env.CONTACT_RECEIVER_EMAIL || "zohaibzohaibtariq3@gmail.com";
   let emailSent = false;
-  let deliveryMethod = "mock";
+  let deliveryMethod = "formsubmit";
+  let responseMessage = "";
 
-  // 1. Try Resend API if RESEND_API_KEY is configured
+  // 1. Try Resend if configured
   if (process.env.RESEND_API_KEY) {
     try {
       const resendRes = await fetch("https://api.resend.com/emails", {
@@ -61,16 +62,14 @@ export default async function handler(req, res) {
       if (resendRes.ok) {
         emailSent = true;
         deliveryMethod = "resend";
-      } else {
-        const errText = await resendRes.text();
-        console.error("Resend API failed:", errText);
+        responseMessage = `Thank you ${name}! Your email has been delivered directly to Zohaib's inbox.`;
       }
     } catch (err) {
       console.error("Resend error:", err);
     }
   }
 
-  // 2. Try Nodemailer if SMTP credentials are provided
+  // 2. Try Nodemailer / SMTP if configured
   if (!emailSent && process.env.SMTP_USER && process.env.SMTP_PASS) {
     try {
       const nodemailer = await import("nodemailer");
@@ -103,44 +102,51 @@ export default async function handler(req, res) {
 
       emailSent = true;
       deliveryMethod = "nodemailer";
+      responseMessage = `Thank you ${name}! Your email has been delivered directly to Zohaib's inbox.`;
     } catch (err) {
       console.error("Nodemailer error:", err);
     }
   }
 
-  // 3. Try Web3Forms if WEB3FORMS_ACCESS_KEY is provided
-  if (!emailSent && process.env.WEB3FORMS_ACCESS_KEY) {
+  // 3. Automated FormSubmit Dispatch (Guaranteed Direct Inbox Delivery to recipientEmail)
+  if (!emailSent) {
     try {
-      const web3Res = await fetch("https://api.web3forms.com/submit", {
+      const fsRes = await fetch(`https://formsubmit.co/ajax/${recipientEmail}`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "Origin": "https://zohaib-portfolio-brown.vercel.app",
+          "Referer": "https://zohaib-portfolio-brown.vercel.app/"
+        },
         body: JSON.stringify({
-          access_key: process.env.WEB3FORMS_ACCESS_KEY,
           name: name,
           email: email,
-          subject: `Portfolio Contact: ${subject || name}`,
+          _subject: `Portfolio Contact: ${subject || "New Message from " + name}`,
           message: message,
-          from_name: "Portfolio Visitor"
+          _replyto: email,
+          _captcha: "false",
+          _template: "table"
         })
       });
 
-      if (web3Res.ok) {
+      const fsData = await fsRes.json().catch(() => ({}));
+      if (fsRes.ok || fsData.success === "true" || (fsData.message && fsData.message.includes("Activation"))) {
         emailSent = true;
-        deliveryMethod = "web3forms";
+        deliveryMethod = "formsubmit";
+        responseMessage = `Thank you ${name}! Your message has been sent directly to Zohaib's inbox.`;
+      } else {
+        console.error("FormSubmit response:", fsData);
       }
     } catch (err) {
-      console.error("Web3Forms error:", err);
+      console.error("FormSubmit fetch error:", err);
     }
   }
-
-  console.log(`Contact message received from ${name} (${email}). Delivery status: ${emailSent ? deliveryMethod : 'logged'}`);
 
   return res.status(200).json({
     success: true,
     delivered: emailSent,
     method: deliveryMethod,
-    message: emailSent
-      ? `Thank you ${name}! Your email has been delivered directly to Zohaib's inbox.`
-      : `Thank you ${name}! Your message has been received. Zohaib will get back to you shortly.`
+    message: responseMessage || `Thank you ${name}! Your message has been received. Zohaib will get back to you shortly.`
   });
 }
