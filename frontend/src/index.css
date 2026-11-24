@@ -1,0 +1,110 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #080808;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #222222;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #FF3030;
+}
+
+/* Custom Selection */
+::selection {
+  background-color: #FF3030;
+  color: #FFFFFF;
+}
+
+/* Glassmorphism Classes */
+.glass-panel {
+  background: rgba(17, 17, 17, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-panel-red {
+  background: rgba(20, 10, 10, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 48, 48, 0.2);
+}
+
+.glass-card {
+  background: rgba(18, 18, 18, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid #292929;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-card:hover {
+  border-color: rgba(255, 48, 48, 0.4);
+  box-shadow: 0 0 25px -5px rgba(255, 48, 48, 0.2);
+  transform: translateY(-2px);
+}
+
+/* Red Glow Utilities */
+.text-glow {
+  text-shadow: 0 0 20px rgba(255, 48, 48, 0.6);
+}
+
+.text-glow-lg {
+  text-shadow: 0 0 35px rgba(255, 48, 48, 0.8), 0 0 70px rgba(255, 48, 48, 0.4);
+}
+
+.box-glow-red {
+  box-shadow: 0 0 30px rgba(255, 48, 48, 0.25);
+}
+
+.border-glow-red {
+  border-color: rgba(255, 48, 48, 0.5);
+  box-shadow: 0 0 20px rgba(255, 48, 48, 0.3);
+}
+
+/* Ambient Radial Gradients */
+.radial-red-spotlight {
+  background: radial-gradient(circle at 50% 0%, rgba(255, 48, 48, 0.15) 0%, rgba(8, 8, 8, 0) 70%);
+}
+
+.radial-red-center {
+  background: radial-gradient(circle at 50% 50%, rgba(255, 48, 48, 0.12) 0%, rgba(8, 8, 8, 0) 65%);
+}
+
+/* Subtle Grid Background */
+.bg-tech-grid {
+  background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* Marquee Animation */
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 25s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
